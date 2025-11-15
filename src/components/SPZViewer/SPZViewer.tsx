@@ -236,10 +236,23 @@ export default function SPZViewer({ source, onError, onLoadComplete, onRegisterR
     const forwardVector = new THREE.Vector3();
     const rightVector = new THREE.Vector3();
     const moveVector = new THREE.Vector3();
+    const tempPosition = new THREE.Vector3();
+    const tempQuaternion = new THREE.Quaternion();
+    const tempScale = new THREE.Vector3();
 
     const renderScene = () => {
       if (controlsRef.current) {
         controlsRef.current.update();
+      }
+
+      if (renderer.xr.isPresenting && cameraRef.current) {
+        const xrCamera = renderer.xr.getCamera();
+        if (xrCamera) {
+          xrCamera.matrixWorld.decompose(tempPosition, tempQuaternion, tempScale);
+          tempPosition.set(0, 0, 0);
+          xrCamera.matrixWorld.compose(tempPosition, tempQuaternion, tempScale);
+          xrCamera.matrixWorldInverse.copy(xrCamera.matrixWorld).invert();
+        }
       }
 
       if (renderer.xr.isPresenting) {
@@ -263,6 +276,7 @@ export default function SPZViewer({ source, onError, onLoadComplete, onRegisterR
       }
 
       if (cameraRef.current) {
+        const orbitControls = controlsRef.current;
         const { forward, backward, left, right } = movementRef.current;
         const keyboardForward = (forward ? 1 : 0) + (backward ? -1 : 0);
         const keyboardTurn = (right ? 1 : 0) + (left ? -1 : 0);
@@ -287,12 +301,14 @@ export default function SPZViewer({ source, onError, onLoadComplete, onRegisterR
             if (moveVector.lengthSq() > 0) {
               moveVector.normalize().multiplyScalar(MOVE_SPEED);
               movementAnchor.position.add(moveVector);
-              controlsRef.current?.target.add(moveVector);
+              if (orbitControls) {
+                orbitControls.target.add(moveVector);
+              }
             }
 
             if (totalTurn !== 0) {
               movementAnchor.rotateY(totalTurn * TURN_SPEED);
-              controlsRef.current?.update();
+              orbitControls?.update();
             }
           }
         }
