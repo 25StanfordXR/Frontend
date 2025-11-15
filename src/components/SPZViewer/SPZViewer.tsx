@@ -49,7 +49,8 @@ export default function SPZViewer({ source, onError, onLoadComplete, onRegisterR
         0.1,
         1000
       );
-      camera.position.set(0, 0, 5);
+      camera.position.set(0, 0, 0);
+      camera.lookAt(0, 0, -1);
       cameraRef.current = camera;
 
       // Create renderer
@@ -73,6 +74,8 @@ export default function SPZViewer({ source, onError, onLoadComplete, onRegisterR
       controls.screenSpacePanning = false;
       controls.minDistance = 1;
       controls.maxDistance = 100;
+      controls.target.set(0, 0, -1);
+      controls.update();
       controlsRef.current = controls;
 
       // Add lights
@@ -236,8 +239,9 @@ export default function SPZViewer({ source, onError, onLoadComplete, onRegisterR
   // Reset camera function
   const resetCamera = useCallback(() => {
     if (cameraRef.current && controlsRef.current) {
-      cameraRef.current.position.set(0, 0, 5);
-      controlsRef.current.target.set(0, 0, 0);
+      cameraRef.current.position.set(0, 0, 0);
+      cameraRef.current.lookAt(0, 0, -1);
+      controlsRef.current.target.set(0, 0, -1);
       controlsRef.current.update();
     }
   }, []);
