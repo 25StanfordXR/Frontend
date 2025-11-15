@@ -36,6 +36,7 @@ export default function SPZViewer({ source, onError, onLoadComplete, onRegisterR
   const containerRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<THREE.Scene | null>(null);
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
+  const rigRef = useRef<THREE.Group | null>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
   const controlsRef = useRef<OrbitControls | null>(null);
   const splatMeshRef = useRef<SplatMesh | null>(null);
@@ -51,6 +52,7 @@ export default function SPZViewer({ source, onError, onLoadComplete, onRegisterR
   const xrButtonRef = useRef<HTMLElement | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
   const MOVE_SPEED = 0.08;
+  const TURN_SPEED = 0.05;
 
   // Initialize Three.js scene
   useEffect(() => {
@@ -72,6 +74,11 @@ export default function SPZViewer({ source, onError, onLoadComplete, onRegisterR
       camera.position.set(0, 0, 0);
       camera.lookAt(0, 0, -1);
       cameraRef.current = camera;
+      const rig = new THREE.Group();
+      rig.name = 'xr-rig';
+      rig.add(camera);
+      scene.add(rig);
+      rigRef.current = rig;
 
       // Create renderer
       const renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: 'high-performance' });
@@ -255,7 +262,7 @@ export default function SPZViewer({ source, onError, onLoadComplete, onRegisterR
         xrAxesRef.current = { forward: 0, turn: 0 };
       }
 
-      if (cameraRef.current && controlsRef.current) {
+      if (cameraRef.current) {
         const { forward, backward, left, right } = movementRef.current;
         const keyboardForward = (forward ? 1 : 0) + (backward ? -1 : 0);
         const keyboardTurn = (right ? 1 : 0) + (left ? -1 : 0);
@@ -270,21 +277,23 @@ export default function SPZViewer({ source, onError, onLoadComplete, onRegisterR
           }
           rightVector.copy(forwardVector).cross(cameraRef.current.up).normalize();
 
-          moveVector.set(0, 0, 0);
-          if (totalForward !== 0) {
-            moveVector.addScaledVector(forwardVector, totalForward);
-          }
+          const movementAnchor = renderer.xr.isPresenting ? rigRef.current : cameraRef.current;
+          if (movementAnchor) {
+            moveVector.set(0, 0, 0);
+            if (totalForward !== 0) {
+              moveVector.addScaledVector(forwardVector, totalForward);
+            }
 
-          if (moveVector.lengthSq() > 0) {
-            moveVector.normalize().multiplyScalar(MOVE_SPEED);
-            cameraRef.current.position.add(moveVector);
-            controlsRef.current.target.add(moveVector);
-          }
+            if (moveVector.lengthSq() > 0) {
+              moveVector.normalize().multiplyScalar(MOVE_SPEED);
+              movementAnchor.position.add(moveVector);
+              controlsRef.current?.target.add(moveVector);
+            }
 
-          if (totalTurn !== 0) {
-            const yaw = totalTurn * 0.05;
-            cameraRef.current.rotateY(yaw);
-            controlsRef.current.update();
+            if (totalTurn !== 0) {
+              movementAnchor.rotateY(totalTurn * TURN_SPEED);
+              controlsRef.current?.update();
+            }
           }
         }
       }
@@ -335,9 +344,13 @@ export default function SPZViewer({ source, onError, onLoadComplete, onRegisterR
 
   // Reset camera function
   const resetCamera = useCallback(() => {
+    if (rigRef.current) {
+      rigRef.current.position.set(0, 0, 0);
+      rigRef.current.rotation.set(0, 0, 0);
+    }
     if (cameraRef.current && controlsRef.current) {
       cameraRef.current.position.set(0, 0, 0);
-      cameraRef.current.lookAt(0, 0, -1);
+      cameraRef.current.rotation.set(0, 0, 0);
       controlsRef.current.target.set(0, 0, -1);
       controlsRef.current.update();
     }
