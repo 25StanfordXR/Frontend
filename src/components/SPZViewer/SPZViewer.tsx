@@ -32,14 +32,6 @@ const pickPrimaryAxes = (axes: readonly number[]): { x: number; y: number } => {
   return { x: selected.x, y: selected.y };
 };
 
-const getFirstXRCamera = (camera: THREE.Camera): THREE.Camera => {
-  const maybeArray = camera as THREE.ArrayCamera;
-  if ((maybeArray as THREE.ArrayCamera).isArrayCamera && maybeArray.cameras.length > 0) {
-    return maybeArray.cameras[0];
-  }
-  return camera;
-};
-
 export default function SPZViewer({ source, onError, onLoadComplete, onRegisterReset }: SPZViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<THREE.Scene | null>(null);
@@ -57,6 +49,7 @@ export default function SPZViewer({ source, onError, onLoadComplete, onRegisterR
   });
   const controllerDataRef = useRef<THREE.Group[]>([]);
   const xrAxesRef = useRef({ forward: 0, turn: 0 });
+  const eyeOffsetMatricesRef = useRef<THREE.Matrix4[]>([]);
   const xrButtonRef = useRef<HTMLElement | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
   const MOVE_SPEED = 0.08;
@@ -166,14 +159,31 @@ export default function SPZViewer({ source, onError, onLoadComplete, onRegisterR
 
       window.addEventListener('resize', handleResize);
 
+      const cacheEyeOffsets = () => {
+        if (!rigRef.current) return;
+        rigRef.current.updateMatrixWorld(true);
+        const rigMatrixInverse = rigRef.current.matrixWorld.clone().invert();
+        const xrCamera = renderer.xr.getCamera();
+        const eyeCameras = (xrCamera as THREE.ArrayCamera).isArrayCamera
+          ? (xrCamera as THREE.ArrayCamera).cameras
+          : [xrCamera];
+        eyeOffsetMatricesRef.current = eyeCameras.map((cam) => {
+          const offset = new THREE.Matrix4();
+          offset.multiplyMatrices(rigMatrixInverse, cam.matrixWorld);
+          return offset;
+        });
+      };
+
       const handleSessionStart = () => {
         controls.enabled = false;
         renderer.setPixelRatio(XR_PIXEL_RATIO);
+        cacheEyeOffsets();
       };
 
       const handleSessionEnd = () => {
         controls.enabled = true;
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, MAX_PIXEL_RATIO));
+        eyeOffsetMatricesRef.current = [];
       };
 
       renderer.xr.addEventListener('sessionstart', handleSessionStart);
@@ -244,9 +254,6 @@ export default function SPZViewer({ source, onError, onLoadComplete, onRegisterR
     const forwardVector = new THREE.Vector3();
     const rightVector = new THREE.Vector3();
     const moveVector = new THREE.Vector3();
-    const tempPosition = new THREE.Vector3();
-    const tempQuaternion = new THREE.Quaternion();
-    const tempScale = new THREE.Vector3();
 
     const renderScene = () => {
       if (controlsRef.current) {
@@ -254,16 +261,18 @@ export default function SPZViewer({ source, onError, onLoadComplete, onRegisterR
       }
 
       if (renderer.xr.isPresenting && rigRef.current) {
+        rigRef.current.updateMatrixWorld(true);
         const xrRenderCamera = renderer.xr.getCamera();
-        const xrCamera = getFirstXRCamera(xrRenderCamera);
-        if (xrCamera) {
-          xrCamera.matrixWorld.decompose(tempPosition, tempQuaternion, tempScale);
-          rigRef.current.position.sub(tempPosition);
-          tempPosition.set(0, 0, 0);
-          const rigRotation = rigRef.current.quaternion.clone();
-          xrCamera.matrixWorld.compose(tempPosition, rigRotation, tempScale);
-          xrCamera.matrixWorldInverse.copy(xrCamera.matrixWorld).invert();
-        }
+        const eyeCameras = (xrRenderCamera as THREE.ArrayCamera).isArrayCamera
+          ? (xrRenderCamera as THREE.ArrayCamera).cameras
+          : [xrRenderCamera];
+        const rigMatrix = rigRef.current.matrixWorld;
+        eyeCameras.forEach((cam, index) => {
+          const offset = eyeOffsetMatricesRef.current[index];
+          if (!offset) return;
+          cam.matrixWorld.multiplyMatrices(rigMatrix, offset);
+          cam.matrixWorldInverse.copy(cam.matrixWorld).invert();
+        });
       }
 
       if (renderer.xr.isPresenting) {
