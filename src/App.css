@@ -1,179 +1,149 @@
 .app {
   width: 100%;
-  height: 100vh;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+  background: radial-gradient(circle at top, #1f1c2c 0%, #111827 45%, #05070b 100%);
+  color: #f7f7f7;
 }
 
 .app-header {
-  padding: 1.5rem 2rem;
-  background: rgba(30, 30, 30, 0.8);
-  border-bottom: 2px solid #646cff;
-  text-align: center;
+  padding: 2rem 3rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.app-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  background: rgba(100, 108, 255, 0.15);
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .app-header h1 {
   margin: 0;
   font-size: 2rem;
-  color: #646cff;
 }
 
 .app-header p {
-  margin: 0.5rem 0 0 0;
+  margin: 0;
   color: rgba(255, 255, 255, 0.7);
-  font-size: 0.95rem;
+  line-height: 1.6;
 }
 
 .app-main {
   flex: 1;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 2rem;
-  overflow: hidden;
-  position: relative;
+  gap: 2rem;
+  padding: 2.5rem 3rem;
 }
 
-.upload-container {
+.insights-panel {
+  flex: 0 0 420px;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
+  flex-direction: column;
+  gap: 1.5rem;
 }
 
-.viewer-wrapper {
-  width: 100%;
-  height: 100%;
+.viewer-panel {
+  flex: 1;
+}
+
+.viewer-shell {
   position: relative;
-}
-
-.viewer-container {
   width: 100%;
   height: 100%;
-  border-radius: 12px;
+  min-height: 520px;
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(5, 7, 11, 0.85);
   overflow: hidden;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 40px 80px rgba(0, 0, 0, 0.45);
 }
 
-.loading-overlay {
+.viewer-shell canvas {
+  border-radius: 24px;
+}
+
+.viewer-overlay {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(26, 26, 26, 0.9);
+  inset: 0;
+  background: rgba(3, 4, 7, 0.75);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 10;
-  border-radius: 12px;
+  border-radius: 24px;
 }
 
-.error-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(26, 26, 26, 0.95);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 10;
-  border-radius: 12px;
-}
-
-.error-box {
-  background: rgba(220, 38, 38, 0.1);
-  border: 2px solid rgba(220, 38, 38, 0.5);
-  border-radius: 12px;
-  padding: 2rem;
-  max-width: 500px;
+.viewer-overlay--error {
+  flex-direction: column;
+  gap: 0.5rem;
   text-align: center;
+  background: rgba(120, 39, 39, 0.8);
 }
 
-.error-box h3 {
-  color: #ef4444;
-  margin-bottom: 1rem;
-  font-size: 1.5rem;
+.viewer-placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 2rem;
+  gap: 1rem;
+  color: rgba(255, 255, 255, 0.75);
 }
 
-.error-box p {
-  color: rgba(255, 255, 255, 0.9);
-  margin-bottom: 1.5rem;
+.viewer-placeholder h3 {
+  font-size: 1.35rem;
+}
+
+.viewer-placeholder ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
   line-height: 1.6;
 }
 
-.error-box button {
-  background-color: #ef4444;
-  color: white;
-}
-
-.error-box button:hover {
-  background-color: #dc2626;
-}
-
-.back-button {
-  position: absolute;
-  top: 20px;
-  left: 20px;
-  background: rgba(30, 30, 30, 0.9);
-  color: white;
-  border: 1px solid #646cff;
-  z-index: 5;
-}
-
-.back-button:hover {
-  background: rgba(100, 108, 255, 0.2);
-  border-color: #535bf2;
-}
-
 .app-footer {
-  padding: 1rem 2rem;
-  background: rgba(30, 30, 30, 0.8);
-  border-top: 1px solid rgba(100, 108, 255, 0.3);
+  padding: 1.5rem;
   text-align: center;
-}
-
-.app-footer p {
-  margin: 0;
-  color: rgba(255, 255, 255, 0.6);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.55);
   font-size: 0.9rem;
 }
 
-.app-footer a {
-  color: #646cff;
-  text-decoration: none;
-  font-weight: 500;
-}
+@media (max-width: 1200px) {
+  .app-main {
+    flex-direction: column;
+  }
 
-.app-footer a:hover {
-  text-decoration: underline;
+  .insights-panel {
+    flex: none;
+  }
+
+  .viewer-shell {
+    min-height: 420px;
+  }
 }
 
 @media (max-width: 768px) {
-  .app-header {
-    padding: 1rem;
-  }
-
-  .app-header h1 {
-    font-size: 1.5rem;
-  }
-
-  .app-header p {
-    font-size: 0.85rem;
+  .app-header,
+  .app-main {
+    padding: 1.5rem;
   }
 
   .app-main {
-    padding: 1rem;
-  }
-
-  .back-button {
-    top: 10px;
-    left: 10px;
-    font-size: 0.9rem;
-    padding: 0.5em 1em;
+    gap: 1.5rem;
   }
 }

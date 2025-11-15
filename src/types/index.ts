@@ -1,12 +1,22 @@
-export interface SPZFile {
-  url?: string;
-  file?: File;
+export interface MapFileInfo {
+  kind: 'plz' | 'ply';
+  file_name: string;
+  url: string;
+}
+
+export interface MapMatchResponse {
+  map_id: string;
+  title: string;
+  description: string;
+  reasoning?: string | null;
+  confidence?: number | null;
+  files: MapFileInfo[];
 }
 
 export interface ViewerState {
+  source: string | null;
   isLoading: boolean;
   error: string | null;
-  loadedFile: SPZFile | null;
 }
 
-export type LoadSource = 'url' | 'file';
+export type MatchPhase = 'idle' | 'loading' | 'ready' | 'error';

@@ -1,134 +1,146 @@
-import { useState, useRef, useCallback } from 'react';
-import FileUpload from './components/FileUpload';
-import SPZViewer from './components/SPZViewer';
-import LoadingSpinner from './components/LoadingSpinner';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import Controls from './components/Controls';
-import { ViewerState } from './types';
+import LoadingSpinner from './components/LoadingSpinner';
+import SPZViewer from './components/SPZViewer';
+import PromptDialog from './components/PromptDialog';
+import MatchDetails from './components/MatchDetails';
+import { requestMapMatch, resolveAssetUrl } from './api/client';
+import { MapMatchResponse, MatchPhase, ViewerState } from './types';
 import './App.css';
 
+const createViewerState = (): ViewerState => ({
+  source: null,
+  isLoading: false,
+  error: null,
+});
+
 function App() {
-  const [viewerState, setViewerState] = useState<ViewerState>({
-    isLoading: false,
-    error: null,
-    loadedFile: null,
-  });
+  const [prompt, setPrompt] = useState('');
+  const [phase, setPhase] = useState<MatchPhase>('idle');
+  const [matchResult, setMatchResult] = useState<MapMatchResponse | null>(null);
+  const [apiError, setApiError] = useState<string | null>(null);
+  const [viewerState, setViewerState] = useState<ViewerState>(() => createViewerState());
 
-  const viewerContainerRef = useRef<HTMLDivElement>(null);
+  const resetCameraRef = useRef<() => void>(() => undefined);
 
-  const handleLoadUrl = useCallback((url: string) => {
+  useEffect(() => {
+    if (!matchResult) {
+      setViewerState(createViewerState());
+      return;
+    }
+
+    const splatFile = matchResult.files.find((file) => file.kind === 'plz');
+    if (!splatFile) {
+      setViewerState({
+        source: null,
+        isLoading: false,
+        error: '匹配结果缺少 SPZ/PLZ 文件',
+      });
+      return;
+    }
+
     setViewerState({
+      source: resolveAssetUrl(splatFile.url),
       isLoading: true,
       error: null,
-      loadedFile: { url },
     });
-  }, []);
+  }, [matchResult]);
 
-  const handleLoadFile = useCallback((file: File) => {
-    setViewerState({
-      isLoading: true,
-      error: null,
-      loadedFile: { file },
-    });
-  }, []);
+  const handlePromptSubmit = useCallback(async (value: string) => {
+    const normalized = value.trim();
+    if (!normalized) {
+      setApiError('描述不能为空');
+      return;
+    }
 
-  const handleError = useCallback((error: string) => {
-    setViewerState((prev) => ({
-      ...prev,
-      isLoading: false,
-      error,
-    }));
-  }, []);
+    setPhase('loading');
+    setApiError(null);
 
-  const handleLoadComplete = useCallback(() => {
-    setViewerState((prev) => ({
-      ...prev,
-      isLoading: false,
-      error: null,
-    }));
-  }, []);
-
-  const handleReset = useCallback(() => {
-    if (viewerContainerRef.current) {
-      const resetFn = (viewerContainerRef.current as any).resetCamera;
-      if (resetFn) {
-        resetFn();
-      }
+    try {
+      const result = await requestMapMatch(normalized);
+      setPrompt(normalized);
+      setMatchResult(result);
+      setPhase('ready');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : '匹配失败';
+      setApiError(message);
+      setPhase('error');
     }
   }, []);
 
-  const handleClearFile = useCallback(() => {
-    setViewerState({
-      isLoading: false,
-      error: null,
-      loadedFile: null,
-    });
+  const handleViewerError = useCallback((message: string) => {
+    setViewerState((prev) => ({ ...prev, isLoading: false, error: message }));
+  }, []);
+
+  const handleViewerReady = useCallback(() => {
+    setViewerState((prev) => ({ ...prev, isLoading: false, error: null }));
+  }, []);
+
+  const handleReset = useCallback(() => {
+    resetCameraRef.current?.();
+  }, []);
+
+  const handleRegisterReset = useCallback((reset: () => void) => {
+    resetCameraRef.current = reset;
   }, []);
 
   return (
     <div className="app">
       <header className="app-header">
-        <h1>SPZ Viewer</h1>
-        <p>Gaussian Splatting File Preview powered by Spark.js</p>
+        <div>
+          <p className="app-badge">25XR World Matching Agent</p>
+          <h1>描述世界，直接渲染 SPZ</h1>
+        </div>
+        <p>
+          后端先做词法筛选再交给 LLM 打分，并暴露静态 SPZ/PLY 资源。前端收敛为一个输入框 + 一个 Spark.js 预览窗口。
+        </p>
       </header>
 
       <main className="app-main">
-        {!viewerState.loadedFile ? (
-          <div className="upload-container">
-            <FileUpload
-              onLoadUrl={handleLoadUrl}
-              onLoadFile={handleLoadFile}
-              isLoading={viewerState.isLoading}
-            />
-          </div>
-        ) : (
-          <div className="viewer-wrapper">
-            {viewerState.isLoading && (
-              <div className="loading-overlay">
-                <LoadingSpinner message="Loading SPZ file..." />
-              </div>
-            )}
+        <section className="insights-panel">
+          <PromptDialog defaultPrompt={prompt} isLoading={phase === 'loading'} error={apiError} onSubmit={handlePromptSubmit} />
+          <MatchDetails prompt={prompt} result={matchResult} isLoading={phase === 'loading'} />
+        </section>
 
-            {viewerState.error && (
-              <div className="error-overlay">
-                <div className="error-box">
-                  <h3>Error</h3>
-                  <p>{viewerState.error}</p>
-                  <button onClick={handleClearFile}>Go Back</button>
-                </div>
-              </div>
-            )}
-
-            <div ref={viewerContainerRef} className="viewer-container">
-              <SPZViewer
-                source={viewerState.loadedFile.url || viewerState.loadedFile.file!}
-                onError={handleError}
-                onLoadComplete={handleLoadComplete}
-              />
-            </div>
-
-            {!viewerState.isLoading && !viewerState.error && (
+        <section className="viewer-panel">
+          <div className="viewer-shell">
+            {viewerState.source ? (
               <>
+                <SPZViewer
+                  source={viewerState.source}
+                  onError={handleViewerError}
+                  onLoadComplete={handleViewerReady}
+                  onRegisterReset={handleRegisterReset}
+                />
+                {viewerState.isLoading && (
+                  <div className="viewer-overlay">
+                    <LoadingSpinner message="加载 SPZ 资源…" />
+                  </div>
+                )}
+                {viewerState.error && (
+                  <div className="viewer-overlay viewer-overlay--error">
+                    <p>{viewerState.error}</p>
+                  </div>
+                )}
                 <Controls onReset={handleReset} />
-                <button className="back-button" onClick={handleClearFile}>
-                  ← Load Another File
-                </button>
               </>
+            ) : (
+              <div className="viewer-placeholder">
+                <h3>等待 SPZ</h3>
+                <p>提交提示词后会自动加载匹配到的 SPZ/PLZ 文件。</p>
+                <ul>
+                  <li>结果命中后自动触发 Spark.js</li>
+                  <li>Reset Camera 用于回到初始视角</li>
+                  <li>右下角可进入 VR 模式</li>
+                </ul>
+              </div>
             )}
           </div>
-        )}
+        </section>
       </main>
 
       <footer className="app-footer">
-        <p>
-          Built with{' '}
-          <a href="https://sparkjs.dev" target="_blank" rel="noopener noreferrer">
-            Spark.js
-          </a>
-          {' '}and{' '}
-          <a href="https://threejs.org" target="_blank" rel="noopener noreferrer">
-            Three.js
-          </a>
-        </p>
+        <p>Spark.js + Three.js · 后端接口 /maps/match · 静态目录 /assets</p>
       </footer>
     </div>
   );

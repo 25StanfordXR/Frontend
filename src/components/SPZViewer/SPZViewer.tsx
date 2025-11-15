@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { VRButton } from 'three/examples/jsm/webxr/VRButton.js';
@@ -11,9 +11,10 @@ interface SPZViewerProps {
   source: string | File;
   onError: (error: string) => void;
   onLoadComplete: () => void;
+  onRegisterReset?: (reset: () => void) => void;
 }
 
-export default function SPZViewer({ source, onError, onLoadComplete }: SPZViewerProps) {
+export default function SPZViewer({ source, onError, onLoadComplete, onRegisterReset }: SPZViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<THREE.Scene | null>(null);
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
@@ -233,20 +234,22 @@ export default function SPZViewer({ source, onError, onLoadComplete }: SPZViewer
   }, []);
 
   // Reset camera function
-  const resetCamera = () => {
+  const resetCamera = useCallback(() => {
     if (cameraRef.current && controlsRef.current) {
       cameraRef.current.position.set(0, 0, 5);
       controlsRef.current.target.set(0, 0, 0);
       controlsRef.current.update();
     }
-  };
+  }, []);
 
   // Expose reset function
   useEffect(() => {
-    if (containerRef.current) {
-      (containerRef.current as any).resetCamera = resetCamera;
+    if (!onRegisterReset) {
+      return undefined;
     }
-  }, []);
+    onRegisterReset(resetCamera);
+    return () => onRegisterReset(() => undefined);
+  }, [onRegisterReset, resetCamera]);
 
   useEffect(() => {
     const handleMovementChange = (event: KeyboardEvent, isActive: boolean) => {
