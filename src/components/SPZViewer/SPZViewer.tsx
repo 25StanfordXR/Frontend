@@ -14,6 +14,8 @@ interface SPZViewerProps {
   onRegisterReset?: (reset: () => void) => void;
 }
 
+const MAX_PIXEL_RATIO = 1.5;
+
 export default function SPZViewer({ source, onError, onLoadComplete, onRegisterReset }: SPZViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<THREE.Scene | null>(null);
@@ -54,9 +56,9 @@ export default function SPZViewer({ source, onError, onLoadComplete, onRegisterR
       cameraRef.current = camera;
 
       // Create renderer
-      const renderer = new THREE.WebGLRenderer({ antialias: true });
+      const renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: 'high-performance' });
       renderer.setSize(containerRef.current.clientWidth, containerRef.current.clientHeight);
-      renderer.setPixelRatio(window.devicePixelRatio);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, MAX_PIXEL_RATIO));
       renderer.xr.enabled = true;
       containerRef.current.appendChild(renderer.domElement);
       const xrButton = VRButton.createButton(renderer);
@@ -95,6 +97,7 @@ export default function SPZViewer({ source, onError, onLoadComplete, onRegisterR
         camera.aspect = containerRef.current.clientWidth / containerRef.current.clientHeight;
         camera.updateProjectionMatrix();
         renderer.setSize(containerRef.current.clientWidth, containerRef.current.clientHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, MAX_PIXEL_RATIO));
       };
 
       window.addEventListener('resize', handleResize);
