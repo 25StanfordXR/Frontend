@@ -14,3 +14,4 @@
 7. 页面/端到端验证：若任务或直觉需要浏览器层测试，调用 chrome MCP 覆盖所有页面，确保无白屏或数据缺失。
 8. 每次工作结束后把对话要点浓缩为最新规则写入本文件，移除过期指令但保留“角色定义”段。
 9. 前端界面必须通过单一 Prompt 对话框调用 `/maps/match`，同步展示匹配结果/置信度并用 Spark.js 自动渲染后台返回的 SPZ/PLZ 资源，禁用独立文件上传入口。
+10. `.env` 中的 `VITE_AGENT_API_BASE_URL` 默认指向 Modal 部署 `https://ybpang-1--world-map-matcher-fastapi-app.modal.run`，按需改为本地地址。

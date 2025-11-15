@@ -46,7 +46,9 @@ SPZ is the native file format for 3D Gaussian Splats used by Spark.js. Gaussian 
 3. 配置后端地址：
    ```bash
    cp .env.example .env
-   # 编辑 .env 并确认 VITE_AGENT_API_BASE_URL 指向 FastAPI 服务
+   # 默认已指向 Modal 部署：
+   # VITE_AGENT_API_BASE_URL=https://ybpang-1--world-map-matcher-fastapi-app.modal.run
+   # 若需要连接本地 FastAPI，可在此修改。
    ```
 
 4. Start the development server:

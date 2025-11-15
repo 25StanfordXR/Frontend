@@ -1,6 +1,6 @@
 import { MapMatchResponse } from '../types';
 
-const FALLBACK_BASE_URL = 'http://localhost:8000';
+const FALLBACK_BASE_URL = 'https://ybpang-1--world-map-matcher-fastapi-app.modal.run';
 const rawBaseUrl = (import.meta.env.VITE_AGENT_API_BASE_URL ?? FALLBACK_BASE_URL).trim();
 const API_BASE_URL = rawBaseUrl.replace(/\/+$/, '');
 
