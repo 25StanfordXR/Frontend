@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { VRButton } from 'three/examples/jsm/webxr/VRButton.js';
+import { XRControllerModelFactory } from 'three/examples/jsm/webxr/XRControllerModelFactory.js';
 import '../../utils/patchSparkFetch';
 // @ts-ignore - Spark.js types may not be complete
 import { SplatMesh } from '@sparkjsdev/spark';
@@ -15,6 +16,7 @@ interface SPZViewerProps {
 }
 
 const MAX_PIXEL_RATIO = 1.5;
+const applyDeadzone = (value: number, threshold = 0.2) => (Math.abs(value) < threshold ? 0 : value);
 
 export default function SPZViewer({ source, onError, onLoadComplete, onRegisterReset }: SPZViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -30,6 +32,7 @@ export default function SPZViewer({ source, onError, onLoadComplete, onRegisterR
     left: false,
     right: false,
   });
+  const xrAxesRef = useRef({ forward: 0, turn: 0 });
   const xrButtonRef = useRef<HTMLElement | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
   const MOVE_SPEED = 0.08;
@@ -60,8 +63,9 @@ export default function SPZViewer({ source, onError, onLoadComplete, onRegisterR
       renderer.setSize(containerRef.current.clientWidth, containerRef.current.clientHeight);
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, MAX_PIXEL_RATIO));
       renderer.xr.enabled = true;
+      renderer.xr.setReferenceSpaceType('local-floor');
       containerRef.current.appendChild(renderer.domElement);
-      const xrButton = VRButton.createButton(renderer);
+      const xrButton = VRButton.createButton(renderer, { requiredFeatures: ['local-floor'] });
       xrButton.style.position = 'absolute';
       xrButton.style.bottom = '16px';
       xrButton.style.right = '16px';
@@ -87,6 +91,23 @@ export default function SPZViewer({ source, onError, onLoadComplete, onRegisterR
       const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
       directionalLight.position.set(5, 5, 5);
       scene.add(directionalLight);
+
+      const controllerModelFactory = new XRControllerModelFactory();
+      const setupController = (index: number) => {
+        if (!renderer.xr) return;
+        const controller = renderer.xr.getController(index);
+        controller.addEventListener('disconnected', () => {
+          xrAxesRef.current = { forward: 0, turn: 0 };
+        });
+        scene.add(controller);
+
+        const grip = renderer.xr.getControllerGrip(index);
+        grip.add(controllerModelFactory.createControllerModel(grip));
+        scene.add(grip);
+      };
+
+      setupController(0);
+      setupController(1);
 
       setIsInitialized(true);
 
@@ -171,9 +192,33 @@ export default function SPZViewer({ source, onError, onLoadComplete, onRegisterR
         controlsRef.current.update();
       }
 
+      const session = renderer.xr.getSession();
+      if (session) {
+        let forwardAxis = 0;
+        let turnAxis = 0;
+        session.inputSources.forEach((source) => {
+          if (!source.gamepad) return;
+          const [x = 0, y = 0] = source.gamepad.axes;
+          if (source.handedness === 'left') {
+            forwardAxis += applyDeadzone(-y);
+          }
+          if (source.handedness === 'right') {
+            turnAxis += applyDeadzone(x);
+          }
+        });
+        xrAxesRef.current = { forward: forwardAxis, turn: turnAxis };
+      } else if (xrAxesRef.current.forward !== 0 || xrAxesRef.current.turn !== 0) {
+        xrAxesRef.current = { forward: 0, turn: 0 };
+      }
+
       if (cameraRef.current && controlsRef.current) {
         const { forward, backward, left, right } = movementRef.current;
-        if (forward || backward || left || right) {
+        const keyboardForward = (forward ? 1 : 0) + (backward ? -1 : 0);
+        const keyboardTurn = (right ? 1 : 0) + (left ? -1 : 0);
+        const totalForward = keyboardForward + xrAxesRef.current.forward;
+        const totalTurn = keyboardTurn + xrAxesRef.current.turn;
+
+        if (totalForward !== 0 || totalTurn !== 0) {
           cameraRef.current.getWorldDirection(forwardVector);
           forwardVector.y = 0;
           if (forwardVector.lengthSq() > 0) {
@@ -182,15 +227,20 @@ export default function SPZViewer({ source, onError, onLoadComplete, onRegisterR
           rightVector.copy(forwardVector).cross(cameraRef.current.up).normalize();
 
           moveVector.set(0, 0, 0);
-          if (forward) moveVector.add(forwardVector);
-          if (backward) moveVector.sub(forwardVector);
-          if (right) moveVector.add(rightVector);
-          if (left) moveVector.sub(rightVector);
+          if (totalForward !== 0) {
+            moveVector.addScaledVector(forwardVector, totalForward);
+          }
 
           if (moveVector.lengthSq() > 0) {
             moveVector.normalize().multiplyScalar(MOVE_SPEED);
             cameraRef.current.position.add(moveVector);
             controlsRef.current.target.add(moveVector);
+          }
+
+          if (totalTurn !== 0) {
+            const yaw = totalTurn * 0.05;
+            cameraRef.current.rotateY(yaw);
+            controlsRef.current.update();
           }
         }
       }
