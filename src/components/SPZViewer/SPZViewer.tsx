@@ -16,6 +16,7 @@ interface SPZViewerProps {
 }
 
 const MAX_PIXEL_RATIO = 1.5;
+const XR_PIXEL_RATIO = 1.0;
 const applyDeadzone = (value: number, threshold = 0.2) => (Math.abs(value) < threshold ? 0 : value);
 const pickPrimaryAxes = (axes: readonly number[]): { x: number; y: number } => {
   const pairs: Array<[number, number]> = axes.length >= 4 ? [[0, 1], [2, 3]] : [[0, 1]];
@@ -45,6 +46,7 @@ export default function SPZViewer({ source, onError, onLoadComplete, onRegisterR
     left: false,
     right: false,
   });
+  const controllerDataRef = useRef<THREE.Group[]>([]);
   const xrAxesRef = useRef({ forward: 0, turn: 0 });
   const xrButtonRef = useRef<HTMLElement | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
@@ -77,6 +79,7 @@ export default function SPZViewer({ source, onError, onLoadComplete, onRegisterR
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, MAX_PIXEL_RATIO));
       renderer.xr.enabled = true;
       renderer.xr.setReferenceSpaceType('local-floor');
+      renderer.xr.setFoveation(1);
       containerRef.current.appendChild(renderer.domElement);
       const xrButton = VRButton.createButton(renderer, { requiredFeatures: ['local-floor'] });
       xrButton.style.position = 'absolute';
@@ -106,12 +109,24 @@ export default function SPZViewer({ source, onError, onLoadComplete, onRegisterR
       scene.add(directionalLight);
 
       const controllerModelFactory = new XRControllerModelFactory();
+      const controllerLineGeometry = new THREE.BufferGeometry().setFromPoints([
+        new THREE.Vector3(0, 0, 0),
+        new THREE.Vector3(0, 0, -0.5),
+      ]);
       const setupController = (index: number) => {
-        if (!renderer.xr) return;
         const controller = renderer.xr.getController(index);
+        controller.addEventListener('connected', (event) => {
+          controller.userData.inputSource = event.data;
+          controllerDataRef.current[index] = controller;
+        });
         controller.addEventListener('disconnected', () => {
+          delete controller.userData.inputSource;
+          controllerDataRef.current[index] = controller;
           xrAxesRef.current = { forward: 0, turn: 0 };
         });
+        const line = new THREE.Line(controllerLineGeometry);
+        line.scale.z = 1.5;
+        controller.add(line);
         scene.add(controller);
 
         const grip = renderer.xr.getControllerGrip(index);
@@ -136,8 +151,23 @@ export default function SPZViewer({ source, onError, onLoadComplete, onRegisterR
 
       window.addEventListener('resize', handleResize);
 
+      const handleSessionStart = () => {
+        controls.enabled = false;
+        renderer.setPixelRatio(XR_PIXEL_RATIO);
+      };
+
+      const handleSessionEnd = () => {
+        controls.enabled = true;
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, MAX_PIXEL_RATIO));
+      };
+
+      renderer.xr.addEventListener('sessionstart', handleSessionStart);
+      renderer.xr.addEventListener('sessionend', handleSessionEnd);
+
       return () => {
         window.removeEventListener('resize', handleResize);
+        renderer.xr.removeEventListener('sessionstart', handleSessionStart);
+        renderer.xr.removeEventListener('sessionend', handleSessionEnd);
       };
     } catch (error) {
       onError(`Failed to initialize 3D viewer: ${error}`);
@@ -205,17 +235,18 @@ export default function SPZViewer({ source, onError, onLoadComplete, onRegisterR
         controlsRef.current.update();
       }
 
-      const session = renderer.xr.getSession();
-      if (session) {
+      if (renderer.xr.isPresenting) {
         let forwardAxis = 0;
         let turnAxis = 0;
-        session.inputSources.forEach((source) => {
-          if (!source.gamepad) return;
-          const { x, y } = pickPrimaryAxes(source.gamepad.axes);
-          if (source.handedness === 'left') {
+        controllerDataRef.current.forEach((controller) => {
+          const inputSource = controller?.userData?.inputSource as XRInputSource | undefined;
+          const gamepad = inputSource?.gamepad;
+          if (!inputSource || !gamepad) return;
+          const { x, y } = pickPrimaryAxes(gamepad.axes);
+          if (inputSource.handedness === 'left') {
             forwardAxis += applyDeadzone(-y);
           }
-          if (source.handedness === 'right') {
+          if (inputSource.handedness === 'right') {
             turnAxis += applyDeadzone(x);
           }
         });
