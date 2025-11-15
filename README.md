@@ -1,15 +1,15 @@
-# SPZ Viewer
+# World Map Matcher UI
 
-A modern web-based viewer for SPZ (Gaussian Splatting) files, built with React, TypeScript, Three.js, and Spark.js.
+Prompt-driven frontend for the `/maps/match` backend. Users describe the world they need, the agent returns the best existing scene together with SPZ/PLY download URLs, and we stream the SPZ file via Spark.js.
 
 ## Features
 
-- 📁 **Multiple Loading Options**: Load SPZ files via URL or local file upload
-- 🎮 **Interactive 3D Controls**: Rotate, pan, and zoom with intuitive mouse controls
-- 🎨 **Modern UI**: Clean, responsive interface that works on all devices
-- ⚡ **High Performance**: Optimized rendering with Three.js and WebGL
-- 🔄 **Real-time Preview**: Instant feedback with loading states and error handling
-- 📱 **Responsive Design**: Works seamlessly on desktop, tablet, and mobile
+- 💬 **Single Prompt Dialog**：输入世界描述即可触发后端词法+LLM 匹配
+- 🔗 **直接对接 `/maps/match`**：自动读取响应中的静态下载地址
+- ✨ **Spark.js 实时渲染**：匹配到的 SPZ/PLZ 文件直接进入 3D 预览
+- 🧭 **匹配洞察面板**：显示 map id、描述、置信度、LLM 推理及资源列表
+- 🎮 **交互控制保持**：完整保留复位、WASD 行走和 VR 模式入口
+- 🛠️ **错误隔离**：API、渲染错误分别提示，不会互相影响
 
 ## What are SPZ Files?
 
@@ -43,12 +43,18 @@ SPZ is the native file format for 3D Gaussian Splats used by Spark.js. Gaussian 
    npm install
    ```
 
-3. Start the development server:
+3. 配置后端地址：
+   ```bash
+   cp .env.example .env
+   # 编辑 .env 并确认 VITE_AGENT_API_BASE_URL 指向 FastAPI 服务
+   ```
+
+4. Start the development server:
    ```bash
    npm run dev
    ```
 
-4. Open your browser and navigate to `http://localhost:3000`
+5. Open your browser and navigate to `http://localhost:3000`
 
 ### Building for Production
 
@@ -66,17 +72,11 @@ npm run preview
 
 ## Usage
 
-### Loading Files
-
-**From URL:**
-1. Enter the URL of an SPZ file in the input field
-2. Click "Load from URL"
-3. The viewer will load and display the 3D scene
-
-**From Local File:**
-1. Click "Choose SPZ File"
-2. Select an SPZ file from your computer
-3. The viewer will load and display the 3D scene
+1. 在左侧对话框输入世界描述（环境、材质、光照等越具体越好）。
+2. 提交后端会调用 `/maps/match`：词法筛选 + OpenRouter LLM 打分。
+3. 相应的 `files` 字段包含 `/assets` 下的 SPZ/PLZ 与 PLY 下载地址。
+4. 前端自动挑选 SPZ/PLZ 资源交给 Spark.js 渲染，其余文件提供下载链接。
+5. 右侧预览窗口可使用鼠标、WASD 或 Reset Camera 控制；点击 VR 按钮进入 WebXR。
 
 ### Controls
 
@@ -91,10 +91,13 @@ npm run preview
 Frontend/
 ├── src/
 │   ├── components/
-│   │   ├── SPZViewer/        # Core 3D viewer component
-│   │   ├── FileUpload/       # File/URL input component
-│   │   ├── Controls/         # Camera control UI
-│   │   └── LoadingSpinner/   # Loading state component
+│   │   ├── SPZViewer/        # Spark.js + Three.js 渲染器
+│   │   ├── PromptDialog/     # 世界描述输入与快速示例
+│   │   ├── MatchDetails/     # 匹配结果、置信度、资源列表
+│   │   ├── Controls/         # 摄像机控制 UI
+│   │   └── LoadingSpinner/   # Loading 状态组件
+│   ├── api/
+│   │   └── client.ts         # `/maps/match` 请求封装与 URL 拼接
 │   ├── types/
 │   │   └── index.ts          # TypeScript type definitions
 │   ├── App.tsx               # Main application component
@@ -148,14 +151,11 @@ See [TROUBLESHOOTING.md](./TROUBLESHOOTING.md) for detailed solutions to common 
 
 ## Future Enhancements
 
-Potential features for future versions:
-- Backend integration for file storage
-- User authentication and file management
-- Splat editing capabilities (color/position)
-- Advanced rendering options
-- Performance statistics display
-- Screenshot/export functionality
-- Multiple file comparison view
+Potential improvements now that the backend is wired up:
+- 在 UI 中展示 Top-K 候选对比/切换
+- 增加 `ply` 云点或缩略图预览
+- 提供请求历史与快速重放
+- 将 VR 控制、曝光等高级渲染参数开放为 UI 选项
 
 ## Resources
 
