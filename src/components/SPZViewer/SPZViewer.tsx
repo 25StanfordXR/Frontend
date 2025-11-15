@@ -260,7 +260,8 @@ export default function SPZViewer({ source, onError, onLoadComplete, onRegisterR
           xrCamera.matrixWorld.decompose(tempPosition, tempQuaternion, tempScale);
           rigRef.current.position.sub(tempPosition);
           tempPosition.set(0, 0, 0);
-          xrCamera.matrixWorld.compose(tempPosition, tempQuaternion, tempScale);
+          const rigRotation = rigRef.current.quaternion.clone();
+          xrCamera.matrixWorld.compose(tempPosition, rigRotation, tempScale);
           xrCamera.matrixWorldInverse.copy(xrCamera.matrixWorld).invert();
         }
       }
