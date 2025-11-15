@@ -1,0 +1,104 @@
+.file-upload {
+  background: rgba(30, 30, 30, 0.8);
+  border-radius: 12px;
+  padding: 2rem;
+  width: 100%;
+  max-width: 500px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.file-upload h2 {
+  margin-bottom: 1.5rem;
+  color: #646cff;
+  text-align: center;
+  font-size: 1.5rem;
+}
+
+.url-form {
+  margin-bottom: 1.5rem;
+}
+
+.input-group {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.input-group input[type="text"] {
+  flex: 1;
+  min-width: 200px;
+}
+
+.divider {
+  text-align: center;
+  margin: 1.5rem 0;
+  position: relative;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 40%;
+  height: 1px;
+  background: rgba(100, 108, 255, 0.3);
+}
+
+.divider::before {
+  left: 0;
+}
+
+.divider::after {
+  right: 0;
+}
+
+.divider span {
+  color: rgba(255, 255, 255, 0.5);
+  background: rgba(30, 30, 30, 0.8);
+  padding: 0 1rem;
+  font-size: 0.9rem;
+}
+
+.file-input-wrapper {
+  text-align: center;
+}
+
+.file-label {
+  display: inline-block;
+  padding: 0.8em 2em;
+  background-color: #646cff;
+  color: white;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  font-weight: 500;
+}
+
+.file-label:hover {
+  background-color: #535bf2;
+}
+
+.file-input-wrapper input[type="file"] {
+  display: none;
+}
+
+button:disabled,
+.file-label:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@media (max-width: 600px) {
+  .file-upload {
+    padding: 1.5rem;
+  }
+
+  .input-group {
+    flex-direction: column;
+  }
+
+  .input-group input[type="text"] {
+    width: 100%;
+  }
+}

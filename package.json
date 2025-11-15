@@ -1,0 +1,39 @@
+{
+  "name": "spz-viewer",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "description": "SPZ File Online Preview using Spark.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "three": "^0.178.0",
+    "@sparkjsdev/spark": "^0.1.10"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.66",
+    "@types/react-dom": "^18.2.22",
+    "@types/three": "^0.178.0",
+    "@typescript-eslint/eslint-plugin": "^7.2.0",
+    "@typescript-eslint/parser": "^7.2.0",
+    "@vitejs/plugin-react": "^4.2.1",
+    "eslint": "^8.57.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-refresh": "^0.4.6",
+    "typescript": "^5.2.2",
+    "vite": "^5.2.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/25StanfordXR/Frontend.git"
+  },
+  "keywords": ["spz", "gaussian-splatting", "3d-viewer", "spark.js", "three.js"],
+  "author": "",
+  "license": "ISC"
+}

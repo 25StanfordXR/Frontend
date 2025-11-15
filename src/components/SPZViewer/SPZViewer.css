@@ -1,0 +1,11 @@
+.spz-viewer-container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.spz-viewer-container canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
