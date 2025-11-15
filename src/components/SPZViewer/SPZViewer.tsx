@@ -17,6 +17,19 @@ interface SPZViewerProps {
 
 const MAX_PIXEL_RATIO = 1.5;
 const applyDeadzone = (value: number, threshold = 0.2) => (Math.abs(value) < threshold ? 0 : value);
+const pickPrimaryAxes = (axes: readonly number[]): { x: number; y: number } => {
+  const pairs: Array<[number, number]> = axes.length >= 4 ? [[0, 1], [2, 3]] : [[0, 1]];
+  let selected: { x: number; y: number; weight: number } = { x: 0, y: 0, weight: 0 };
+  for (const [i, j] of pairs) {
+    const x = axes[i] ?? 0;
+    const y = axes[j] ?? 0;
+    const weight = Math.abs(x) + Math.abs(y);
+    if (weight > selected.weight) {
+      selected = { x, y, weight };
+    }
+  }
+  return { x: selected.x, y: selected.y };
+};
 
 export default function SPZViewer({ source, onError, onLoadComplete, onRegisterReset }: SPZViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -198,7 +211,7 @@ export default function SPZViewer({ source, onError, onLoadComplete, onRegisterR
         let turnAxis = 0;
         session.inputSources.forEach((source) => {
           if (!source.gamepad) return;
-          const [x = 0, y = 0] = source.gamepad.axes;
+          const { x, y } = pickPrimaryAxes(source.gamepad.axes);
           if (source.handedness === 'left') {
             forwardAxis += applyDeadzone(-y);
           }
