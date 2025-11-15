@@ -32,6 +32,14 @@ const pickPrimaryAxes = (axes: readonly number[]): { x: number; y: number } => {
   return { x: selected.x, y: selected.y };
 };
 
+const getFirstXRCamera = (camera: THREE.Camera): THREE.Camera => {
+  const maybeArray = camera as THREE.ArrayCamera;
+  if ((maybeArray as THREE.ArrayCamera).isArrayCamera && maybeArray.cameras.length > 0) {
+    return maybeArray.cameras[0];
+  }
+  return camera;
+};
+
 export default function SPZViewer({ source, onError, onLoadComplete, onRegisterReset }: SPZViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<THREE.Scene | null>(null);
@@ -245,10 +253,12 @@ export default function SPZViewer({ source, onError, onLoadComplete, onRegisterR
         controlsRef.current.update();
       }
 
-      if (renderer.xr.isPresenting && cameraRef.current) {
-        const xrCamera = renderer.xr.getCamera();
+      if (renderer.xr.isPresenting && rigRef.current) {
+        const xrRenderCamera = renderer.xr.getCamera();
+        const xrCamera = getFirstXRCamera(xrRenderCamera);
         if (xrCamera) {
           xrCamera.matrixWorld.decompose(tempPosition, tempQuaternion, tempScale);
+          rigRef.current.position.sub(tempPosition);
           tempPosition.set(0, 0, 0);
           xrCamera.matrixWorld.compose(tempPosition, tempQuaternion, tempScale);
           xrCamera.matrixWorldInverse.copy(xrCamera.matrixWorld).invert();
