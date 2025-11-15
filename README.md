@@ -5,7 +5,7 @@ Prompt-driven frontend for the `/maps/match` backend. Users describe the world t
 ## Features
 
 - 💬 **Single Prompt Dialog**：输入世界描述即可触发后端词法+LLM 匹配
-- 🔗 **直接对接 `/maps/match`**：自动读取响应中的静态下载地址
+- 🔗 **直接对接 `/maps/match`**：自动读取响应中的静态资源
 - ✨ **Spark.js 实时渲染**：匹配到的 SPZ/PLZ 文件直接进入 3D 预览
 - 🧭 **匹配洞察面板**：显示 map id、描述、置信度、LLM 推理及资源列表
 - 🎮 **交互控制保持**：完整保留复位、WASD 行走和 VR 模式入口
@@ -76,8 +76,8 @@ npm run preview
 
 1. 在左侧对话框输入世界描述（环境、材质、光照等越具体越好）。
 2. 提交后端会调用 `/maps/match`：词法筛选 + OpenRouter LLM 打分。
-3. 相应的 `files` 字段包含 `/assets` 下的 SPZ/PLZ 与 PLY 下载地址。
-4. 前端自动挑选 SPZ/PLZ 资源交给 Spark.js 渲染，其余文件提供下载链接。
+3. 相应的 `files` 字段包含 `/assets` 下的 SPZ/PLZ 与 PLY 资源。
+4. 前端自动挑选 SPZ/PLZ 资源交给 Spark.js 渲染，不再提供人工下载入口。
 5. 右侧预览窗口可使用鼠标、WASD 或 Reset Camera 控制；点击 VR 按钮进入 WebXR。
 
 ### Controls

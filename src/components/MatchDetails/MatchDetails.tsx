@@ -1,5 +1,4 @@
 import { MapFileInfo, MapMatchResponse } from '../../types';
-import { resolveAssetUrl } from '../../api/client';
 import './MatchDetails.css';
 
 interface MatchDetailsProps {
@@ -38,7 +37,7 @@ export default function MatchDetails({ prompt, result, isLoading }: MatchDetails
           <ul>
             <li>包含环境、时间、材质等细节</li>
             <li>系统会给出置信度和 LLM 推理</li>
-            <li>文件在 /assets 静态目录，可直接下载</li>
+            <li>一旦命中 SPZ/PLZ，右侧 Spark.js 会立即加载</li>
           </ul>
         </div>
       )}
@@ -64,26 +63,11 @@ export default function MatchDetails({ prompt, result, isLoading }: MatchDetails
             </div>
           )}
 
-          <div className="match-details__files">
-            <div className="match-details__files-heading">
-              <h4>可用文件</h4>
-              {!hasSplats(files) && (
-                <span className="match-details__warning">缺少 SPZ/PLZ 文件，无法即时预览</span>
-              )}
-            </div>
-            <ul>
-              {files.map((file) => (
-                <li key={`${file.kind}-${file.file_name}`}>
-                  <div>
-                    <p className="match-details__file-name">{file.file_name}</p>
-                    <span className="match-details__file-kind">.{file.kind}</span>
-                  </div>
-                  <a href={resolveAssetUrl(file.url)} target="_blank" rel="noreferrer">
-                    下载
-                  </a>
-                </li>
-              ))}
-            </ul>
+          <div className="match-details__render-status">
+            <p className="match-details__status-label">Spark.js 渲染</p>
+            <p className={`match-details__status-value ${hasSplats(files) ? 'is-ready' : 'is-warning'}`}>
+              {hasSplats(files) ? '已自动加载匹配到的 SPZ/PLZ 资源' : '当前匹配缺少 SPZ/PLZ，无法渲染'}
+            </p>
           </div>
         </div>
       )}
