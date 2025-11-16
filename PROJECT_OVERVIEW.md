@@ -2,225 +2,225 @@
 
 ## 🎯 Project Summary
 
-一个现代化的 Web 应用，用于在线预览 SPZ（Gaussian Splatting）3D 文件。该项目使用 React + TypeScript + Vite 构建，集成了 Spark.js 和 Three.js 来实现高性能的 3D 渲染。
+A modern web application for online preview of SPZ (Gaussian Splatting) 3D files. This project is built with React + TypeScript + Vite, integrating Spark.js and Three.js to achieve high-performance 3D rendering.
 
-## ✨ 核心功能
+## ✨ Core Features
 
-### 已实现功能
-- ✅ 通过 URL 加载 SPZ 文件
-- ✅ 上传本地 SPZ 文件
-- ✅ 交互式 3D 查看器（旋转、缩放、平移）
-- ✅ 相机控制和重置功能
-- ✅ 加载状态和错误处理
-- ✅ 完全响应式设计
-- ✅ TypeScript 类型安全
-- ✅ 现代化 UI 界面
+### Implemented Features
+- ✅ Load SPZ files via URL
+- ✅ Upload local SPZ files
+- ✅ Interactive 3D viewer (rotate, zoom, pan)
+- ✅ Camera controls and reset functionality
+- ✅ Loading status and error handling
+- ✅ Fully responsive design
+- ✅ TypeScript type safety
+- ✅ Modern UI interface
 
-### 技术特性
-- ⚡ Vite 构建工具 - 极速开发体验
-- 🎨 CSS Modules - 作用域样式
-- 🔒 TypeScript - 类型安全保障
-- 🎮 Three.js - 3D 图形渲染
-- ✨ Spark.js - Gaussian Splatting 支持
-- 📱 响应式设计 - 支持所有设备
+### Technical Features
+- ⚡ Vite build tool - Lightning-fast development experience
+- 🎨 CSS Modules - Scoped styles
+- 🔒 TypeScript - Type safety guarantee
+- 🎮 Three.js - 3D graphics rendering
+- ✨ Spark.js - Gaussian Splatting support
+- 📱 Responsive design - Supports all devices
 
-## 📁 项目结构
+## 📁 Project Structure
 
 ```
 Frontend/
 ├── src/
-│   ├── components/              # React 组件
-│   │   ├── SPZViewer/          # 核心 3D 查看器
-│   │   │   ├── SPZViewer.tsx   # 主要组件逻辑
-│   │   │   ├── SPZViewer.css   # 样式
-│   │   │   └── index.ts        # 导出
-│   │   ├── FileUpload/         # 文件上传组件
-│   │   ├── Controls/           # 控制面板
-│   │   └── LoadingSpinner/     # 加载动画
-│   ├── types/                  # TypeScript 类型定义
-│   ├── App.tsx                 # 主应用组件
-│   ├── App.css                 # 全局样式
-│   ├── main.tsx                # 应用入口
-│   └── index.css               # 基础样式
+│   ├── components/              # React components
+│   │   ├── SPZViewer/          # Core 3D viewer
+│   │   │   ├── SPZViewer.tsx   # Main component logic
+│   │   │   ├── SPZViewer.css   # Styles
+│   │   │   └── index.ts        # Export
+│   │   ├── FileUpload/         # File upload component
+│   │   ├── Controls/           # Control panel
+│   │   └── LoadingSpinner/     # Loading animation
+│   ├── types/                  # TypeScript type definitions
+│   ├── App.tsx                 # Main application component
+│   ├── App.css                 # Global styles
+│   ├── main.tsx                # Application entry
+│   └── index.css               # Base styles
 ├── public/
-│   └── samples/                # 示例文件目录
-├── .vscode/                    # VS Code 配置
-├── package.json                # 依赖配置
-├── tsconfig.json               # TypeScript 配置
-├── vite.config.ts              # Vite 配置
-├── README.md                   # 完整文档
-├── QUICKSTART.md               # 快速开始指南
-└── PROJECT_OVERVIEW.md         # 本文件
+│   └── samples/                # Sample files directory
+├── .vscode/                    # VS Code configuration
+├── package.json                # Dependency configuration
+├── tsconfig.json               # TypeScript configuration
+├── vite.config.ts              # Vite configuration
+├── README.md                   # Complete documentation
+├── QUICKSTART.md               # Quick start guide
+└── PROJECT_OVERVIEW.md         # This file
 ```
 
-## 🚀 快速开始
+## 🚀 Quick Start
 
 ```bash
-# 1. 安装依赖
+# 1. Install dependencies
 npm install
 
-# 2. 启动开发服务器
+# 2. Start development server
 npm run dev
 
-# 3. 打开浏览器访问
+# 3. Open browser and visit
 # http://localhost:3000
 
-# 4. 构建生产版本
+# 4. Build production version
 npm run build
 
-# 5. 预览生产版本
+# 5. Preview production version
 npm run preview
 ```
 
-## 🛠️ 技术栈详情
+## 🛠️ Technology Stack Details
 
-### 核心依赖
-| 包名 | 版本 | 用途 |
-|------|------|------|
-| React | ^18.2.0 | UI 框架 |
-| React DOM | ^18.2.0 | React 渲染器 |
-| Three.js | ^0.178.0 | 3D 图形库 |
-| @sparkjsdev/spark | ^0.1.10 | Gaussian Splatting 渲染 |
+### Core Dependencies
+| Package | Version | Purpose |
+|---------|---------|---------|
+| React | ^18.2.0 | UI framework |
+| React DOM | ^18.2.0 | React renderer |
+| Three.js | ^0.178.0 | 3D graphics library |
+| @sparkjsdev/spark | ^0.1.10 | Gaussian Splatting rendering |
 
-### 开发依赖
-| 包名 | 版本 | 用途 |
-|------|------|------|
-| TypeScript | ^5.2.2 | 类型系统 |
-| Vite | ^5.2.0 | 构建工具 |
-| @vitejs/plugin-react | ^4.2.1 | React 插件 |
-| ESLint | ^8.57.0 | 代码检查 |
+### Development Dependencies
+| Package | Version | Purpose |
+|---------|---------|---------|
+| TypeScript | ^5.2.2 | Type system |
+| Vite | ^5.2.0 | Build tool |
+| @vitejs/plugin-react | ^4.2.1 | React plugin |
+| ESLint | ^8.57.0 | Code linting |
 
-## 🎨 架构设计
+## 🎨 Architecture Design
 
-### 组件层次结构
+### Component Hierarchy
 ```
-App (主应用)
-├── FileUpload (文件上传界面)
-│   ├── URL 输入表单
-│   └── 本地文件选择
-├── SPZViewer (3D 查看器)
+App (Main application)
+├── FileUpload (File upload interface)
+│   ├── URL input form
+│   └── Local file selection
+├── SPZViewer (3D viewer)
 │   ├── Three.js Scene
 │   ├── Camera
 │   ├── Renderer
 │   ├── OrbitControls
 │   └── SplatMesh
-├── Controls (控制面板)
-│   ├── 重置按钮
-│   └── 操作说明
-└── LoadingSpinner (加载动画)
+├── Controls (Control panel)
+│   ├── Reset button
+│   └── Operation instructions
+└── LoadingSpinner (Loading animation)
 ```
 
-### 数据流
-1. 用户选择 SPZ 文件（URL 或本地文件）
-2. App 组件更新 `viewerState`
-3. SPZViewer 接收文件源并加载
-4. Three.js 场景初始化
-5. SplatMesh 加载 SPZ 数据
-6. 渲染循环开始
-7. OrbitControls 处理用户交互
+### Data Flow
+1. User selects SPZ file (URL or local file)
+2. App component updates `viewerState`
+3. SPZViewer receives file source and loads
+4. Three.js scene initializes
+5. SplatMesh loads SPZ data
+6. Render loop begins
+7. OrbitControls handles user interaction
 
-## 🔧 核心实现
+## 🔧 Core Implementation
 
-### SPZViewer 组件
-- 使用 React hooks 管理 Three.js 生命周期
-- `useEffect` 处理场景初始化
-- `useRef` 保持 Three.js 对象引用
-- 自动处理窗口调整大小
-- 内存清理和资源释放
+### SPZViewer Component
+- Uses React hooks to manage Three.js lifecycle
+- `useEffect` handles scene initialization
+- `useRef` maintains Three.js object references
+- Automatically handles window resizing
+- Memory cleanup and resource release
 
-### 文件加载
-- URL 直接加载
-- 本地文件通过 `URL.createObjectURL()` 转换
-- 文件格式验证（.spz 扩展名）
-- 加载超时处理（30秒）
-- 错误边界和用户反馈
+### File Loading
+- URL direct loading
+- Local files converted via `URL.createObjectURL()`
+- File format validation (.spz extension)
+- Loading timeout handling (30 seconds)
+- Error boundaries and user feedback
 
-### 3D 交互
-- OrbitControls 提供标准相机控制
-- 阻尼效果平滑交互
-- 缩放距离限制（1-100）
-- 相机重置功能
+### 3D Interaction
+- OrbitControls provides standard camera controls
+- Damping effect for smooth interaction
+- Zoom distance limits (1-100)
+- Camera reset functionality
 
-## 📊 性能优化
+## 📊 Performance Optimization
 
-- Vite 的快速 HMR（热模块替换）
-- Three.js WebGL 渲染优化
-- 组件懒加载（按需）
-- CSS 模块化减少样式冲突
-- TypeScript 编译优化
-- 生产构建代码分割
+- Vite's fast HMR (Hot Module Replacement)
+- Three.js WebGL rendering optimization
+- Component lazy loading (on demand)
+- CSS modularization reduces style conflicts
+- TypeScript compilation optimization
+- Production build code splitting
 
-## 🔮 未来扩展
+## 🔮 Future Extensions
 
-### 计划功能
-- [ ] 后端集成（文件存储、用户管理）
-- [ ] SPZ 文件编辑功能（颜色、位置）
-- [ ] 性能统计面板（FPS、内存）
-- [ ] 截图和导出功能
-- [ ] 全屏模式
-- [ ] 多文件对比视图
-- [ ] 文件格式转换
-- [ ] 高级渲染选项
+### Planned Features
+- [ ] Backend integration (file storage, user management)
+- [ ] SPZ file editing functionality (color, position)
+- [ ] Performance statistics panel (FPS, memory)
+- [ ] Screenshot and export functionality
+- [ ] Fullscreen mode
+- [ ] Multi-file comparison view
+- [ ] File format conversion
+- [ ] Advanced rendering options
 
-### 架构扩展点
-- API 层已预留接口
-- 组件化设计易于添加功能
-- TypeScript 接口支持扩展
-- 配置化渲染参数
+### Architecture Extension Points
+- API layer interfaces reserved
+- Component design makes adding features easy
+- TypeScript interfaces support extensions
+- Configurable rendering parameters
 
-## 🌐 浏览器支持
+## 🌐 Browser Support
 
 - ✅ Chrome/Edge 90+
 - ✅ Firefox 88+
 - ✅ Safari 14+
-- ⚠️ 需要 WebGL 2.0 支持
+- ⚠️ WebGL 2.0 support required
 
-## 📚 相关资源
+## 📚 Related Resources
 
-- [Spark.js 官方文档](https://sparkjs.dev/docs/)
-- [Three.js 官方文档](https://threejs.org/docs/)
-- [3D Gaussian Splatting 论文](https://repo-sam.inria.fr/fungraph/3d-gaussian-splatting/)
-- [Vite 文档](https://vitejs.dev/)
-- [React 文档](https://react.dev/)
+- [Spark.js Official Documentation](https://sparkjs.dev/docs/)
+- [Three.js Official Documentation](https://threejs.org/docs/)
+- [3D Gaussian Splatting Paper](https://repo-sam.inria.fr/fungraph/3d-gaussian-splatting/)
+- [Vite Documentation](https://vitejs.dev/)
+- [React Documentation](https://react.dev/)
 
-## 📝 开发规范
+## 📝 Development Standards
 
-### 代码风格
-- ESLint 规则检查
-- TypeScript 严格模式
-- 组件使用函数式写法
-- CSS Modules 作用域样式
+### Code Style
+- ESLint rules checking
+- TypeScript strict mode
+- Components use functional approach
+- CSS Modules scoped styles
 
-### 命名约定
-- 组件：PascalCase (e.g., `SPZViewer`)
-- 文件：与组件名匹配
-- 变量：camelCase
-- 常量：UPPER_SNAKE_CASE
-- CSS 类：kebab-case
+### Naming Conventions
+- Components: PascalCase (e.g., `SPZViewer`)
+- Files: Match component names
+- Variables: camelCase
+- Constants: UPPER_SNAKE_CASE
+- CSS classes: kebab-case
 
-### Git 工作流
-- main 分支为生产分支
-- 功能开发使用 feature 分支
-- 代码审查后合并
+### Git Workflow
+- main branch is production branch
+- Feature development uses feature branches
+- Merge after code review
 
-## 🤝 贡献指南
+## 🤝 Contributing Guidelines
 
-1. Fork 本仓库
-2. 创建功能分支 (`git checkout -b feature/AmazingFeature`)
-3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
-4. 推送到分支 (`git push origin feature/AmazingFeature`)
-5. 开启 Pull Request
+1. Fork this repository
+2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
-## 📄 许可证
+## 📄 License
 
 ISC License
 
-## 👥 作者
+## 👥 Authors
 
 25XR Team
 
 ---
 
-**项目状态**: ✅ Production Ready
+**Project Status**: ✅ Production Ready
 
-**最后更新**: 2025-11-14
+**Last Updated**: 2025-11-14

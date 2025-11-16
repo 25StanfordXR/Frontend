@@ -11,10 +11,11 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
   },
   "dependencies": {
+    "@sparkjsdev/spark": "^0.1.10",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "three": "^0.178.0",
-    "@sparkjsdev/spark": "^0.1.10"
+    "react-router-dom": "^7.9.6",
+    "three": "^0.178.0"
   },
   "devDependencies": {
     "@types/react": "^18.2.66",
@@ -33,7 +34,13 @@
     "type": "git",
     "url": "git+https://github.com/25StanfordXR/Frontend.git"
   },
-  "keywords": ["spz", "gaussian-splatting", "3d-viewer", "spark.js", "three.js"],
+  "keywords": [
+    "spz",
+    "gaussian-splatting",
+    "3d-viewer",
+    "spark.js",
+    "three.js"
+  ],
   "author": "",
   "license": "ISC"
 }

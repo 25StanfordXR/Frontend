@@ -9,9 +9,9 @@ interface PromptDialogProps {
 }
 
 const promptSuggestions = [
-  '雾气缭绕的赛博港口，充满霓虹和潮湿的钢铁栈桥',
-  '被藤蔓占领的地中海古堡，黎明阳光透过破碎穹顶',
-  '漂浮在星云中的岩石集市，低重力和悬浮灯笼',
+  'Fog-wrapped cyber port, full of neon and damp steel docks',
+  'Mediterranean fortress occupied by vines, dawn sunlight through broken dome',
+  'Rock marketplace floating in nebula, low gravity and floating lanterns',
 ];
 
 export default function PromptDialog({ defaultPrompt = '', isLoading, error, onSubmit }: PromptDialogProps) {
@@ -39,35 +39,35 @@ export default function PromptDialog({ defaultPrompt = '', isLoading, error, onS
       <div className="prompt-dialog__header">
         <div>
           <p className="prompt-dialog__eyebrow">World Prompt</p>
-          <h2 id="prompt-dialog-title">描述你想要的空间</h2>
-          <p className="prompt-dialog__hint">细节越具体，匹配到的场景越可信。</p>
+          <h2 id="prompt-dialog-title">Describe the space you want</h2>
+          <p className="prompt-dialog__hint">The more specific the details, the more credible the matched scene.</p>
         </div>
       </div>
 
       <form className="prompt-dialog__form" onSubmit={handleSubmit}>
         <label htmlFor="world-prompt" className="sr-only">
-          世界描述
+          World description
         </label>
         <textarea
           id="world-prompt"
           value={value}
           onChange={(event) => setValue(event.target.value)}
-          placeholder="例如：穿过雾霾的霓虹巷子，水洼倒影闪烁"
+          placeholder="e.g., Neon alley through haze, puddle reflections flickering"
           disabled={isLoading}
           rows={4}
         />
         <div className="prompt-dialog__actions">
           <button type="submit" disabled={!trimmedValue || isLoading}>
-            {isLoading ? '匹配中…' : '匹配世界'}
+            {isLoading ? 'Matching…' : 'Match World'}
           </button>
-          <p className="prompt-dialog__status">后端：/maps/match</p>
+          <p className="prompt-dialog__status">Backend: /maps/match</p>
         </div>
       </form>
 
       {error && <p className="prompt-dialog__error">{error}</p>}
 
       <div className="prompt-dialog__suggestions">
-        <span>快速示例：</span>
+        <span>Quick examples:</span>
         <div className="prompt-dialog__chips">
           {promptSuggestions.map((suggestion) => (
             <button

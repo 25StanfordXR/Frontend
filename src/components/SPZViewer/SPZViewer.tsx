@@ -6,10 +6,13 @@ import { XRControllerModelFactory } from 'three/examples/jsm/webxr/XRControllerM
 import '../../utils/patchSparkFetch';
 // @ts-ignore - Spark.js types may not be complete
 import { SplatMesh } from '@sparkjsdev/spark';
+import { LODManager } from '../../utils/LODManager';
+import { ChunkLODData } from '../../types';
 import './SPZViewer.css';
 
 interface SPZViewerProps {
-  source: string | File;
+  source?: string | File;
+  chunks?: ChunkLODData[];
   onError: (error: string) => void;
   onLoadComplete: () => void;
   onRegisterReset?: (reset: () => void) => void;
@@ -32,7 +35,7 @@ const pickPrimaryAxes = (axes: readonly number[]): { x: number; y: number } => {
   return { x: selected.x, y: selected.y };
 };
 
-export default function SPZViewer({ source, onError, onLoadComplete, onRegisterReset }: SPZViewerProps) {
+export default function SPZViewer({ source, chunks, onError, onLoadComplete, onRegisterReset }: SPZViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<THREE.Scene | null>(null);
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
@@ -40,6 +43,7 @@ export default function SPZViewer({ source, onError, onLoadComplete, onRegisterR
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
   const controlsRef = useRef<OrbitControls | null>(null);
   const splatMeshRef = useRef<SplatMesh | null>(null);
+  const lodManagerRef = useRef<LODManager | null>(null);
   const animationFrameRef = useRef<number | null>(null);
   const movementRef = useRef({
     forward: false,
@@ -185,9 +189,9 @@ export default function SPZViewer({ source, onError, onLoadComplete, onRegisterR
     }
   }, [isInitialized, onError]);
 
-  // Load SPZ file
+  // Load SPZ file (legacy single source mode)
   useEffect(() => {
-    if (!isInitialized || !sceneRef.current) return;
+    if (!isInitialized || !sceneRef.current || !source || chunks) return;
 
     const loadSPZ = async () => {
       try {
@@ -195,6 +199,12 @@ export default function SPZViewer({ source, onError, onLoadComplete, onRegisterR
         if (splatMeshRef.current) {
           sceneRef.current?.remove(splatMeshRef.current);
           splatMeshRef.current = null;
+        }
+
+        // Dispose LOD manager if it exists
+        if (lodManagerRef.current) {
+          lodManagerRef.current.dispose();
+          lodManagerRef.current = null;
         }
 
         let splatURL: string;
@@ -230,7 +240,52 @@ export default function SPZViewer({ source, onError, onLoadComplete, onRegisterR
     };
 
     loadSPZ();
-  }, [source, isInitialized, onError, onLoadComplete]);
+  }, [source, chunks, isInitialized, onError, onLoadComplete]);
+
+  // Load chunks with LOD manager (new mode)
+  useEffect(() => {
+    if (!isInitialized || !sceneRef.current || !cameraRef.current || !chunks) return;
+
+    const loadChunks = async () => {
+      try {
+        // Remove legacy single mesh if exists
+        if (splatMeshRef.current) {
+          sceneRef.current?.remove(splatMeshRef.current);
+          splatMeshRef.current = null;
+        }
+
+        // Dispose previous LOD manager if exists
+        if (lodManagerRef.current) {
+          lodManagerRef.current.dispose();
+        }
+
+        // Create new LOD manager
+        if (!sceneRef.current || !cameraRef.current) {
+          onError('Scene or camera not initialized');
+          return;
+        }
+        const lodManager = new LODManager(sceneRef.current, cameraRef.current, {
+          nearDistance: 5.0,
+          farDistance: 10.0,
+          fadeDuration: 0.3,
+          maxLoadedChunks: 20,
+          enableFrustumCulling: true,
+        });
+
+        lodManagerRef.current = lodManager;
+
+        // Initialize chunks
+        await lodManager.initializeChunks(chunks);
+
+        // Notify loading complete
+        onLoadComplete();
+      } catch (error) {
+        onError(`Failed to load chunks: ${error}`);
+      }
+    };
+
+    loadChunks();
+  }, [chunks, isInitialized, onError, onLoadComplete]);
 
   // Animation loop
   useEffect(() => {
@@ -306,6 +361,11 @@ export default function SPZViewer({ source, onError, onLoadComplete, onRegisterR
             }
           }
         }
+
+        // Update LOD manager if active
+        if (lodManagerRef.current) {
+          lodManagerRef.current.update(delta);
+        }
       }
 
       if (renderer && sceneRef.current && cameraRef.current) {
@@ -348,6 +408,9 @@ export default function SPZViewer({ source, onError, onLoadComplete, onRegisterR
       }
       if (splatMeshRef.current) {
         sceneRef.current?.remove(splatMeshRef.current);
+      }
+      if (lodManagerRef.current) {
+        lodManagerRef.current.dispose();
       }
     };
   }, []);

@@ -2,6 +2,13 @@ export interface MapFileInfo {
   kind: 'plz' | 'ply';
   file_name: string;
   url: string;
+  // LOD extensions
+  lod_level?: 'high' | 'low';
+  chunk_id?: string;
+  chunk_bounds?: {
+    min: [number, number, number];
+    max: [number, number, number];
+  };
 }
 
 export interface MapMatchResponse {
@@ -13,8 +20,19 @@ export interface MapMatchResponse {
   files: MapFileInfo[];
 }
 
+export interface ChunkLODData {
+  chunkId: string;
+  highQualityUrl: string;
+  lowQualityUrl: string;
+  bounds: {
+    min: [number, number, number];
+    max: [number, number, number];
+  };
+}
+
 export interface ViewerState {
   source: string | null;
+  chunks: ChunkLODData[] | null;
   isLoading: boolean;
   error: string | null;
 }

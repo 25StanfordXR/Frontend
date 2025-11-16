@@ -2,12 +2,12 @@
 
 Authoritative reference for how the current Vite/React front‑end boots Spark.js and renders `.spz` Gaussian splats. Keep this handy when onboarding new contributors or when we revisit the integration later.
 
-## 1. Quick Start (本地运行步骤)
+## 1. Quick Start (Local Setup)
 
 1. **Install deps** – `npm install`
 2. **Start dev server** – `npm run dev` (default: `http://localhost:5173`)
 3. **Load a splat** – Use the landing page to either paste an `.spz` URL or upload a local file.
-4. **Interact** – Use orbit/mouse controls or WASD keys; hit “Reset Camera” when needed.
+4. **Interact** – Use orbit/mouse controls or WASD keys; hit "Reset Camera" when needed.
 
 > Build for release with `npm run build` and preview via `npm run preview`. The Spark shim works in all modes because it runs before Spark first touches `fetch`.
 

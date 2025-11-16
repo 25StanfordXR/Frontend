@@ -30,7 +30,7 @@ const extractErrorMessage = async (response: Response): Promise<string> => {
   }
 
   const reason = response.statusText || 'Unknown error';
-  return `匹配服务返回 ${response.status}: ${reason}`;
+  return `Match service returned ${response.status}: ${reason}`;
 };
 
 interface MatchRequestOptions {
@@ -58,7 +58,7 @@ export async function requestMapMatch(prompt: string, options?: MatchRequestOpti
     return (await response.json()) as MapMatchResponse;
   } catch (error) {
     if ((error as Error).name === 'AbortError') {
-      throw new Error('请求已被取消');
+      throw new Error('Request cancelled');
     }
     throw error;
   }
